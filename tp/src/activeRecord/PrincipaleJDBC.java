@@ -1,37 +1,14 @@
 package activeRecord;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
+import java.sql.*;
 
 public class PrincipaleJDBC {
 
 	// IL FAUT PENSER A AJOUTER MYSQLCONNECTOR AU CLASSPATH
 
 	public static void main(String[] args) throws SQLException {
-
-		// variables a modifier en fonction de la base
-		String userName = "root";
-		String password = "";
-		String serverName = "localhost";
-		//Attention, sous MAMP, le port est 8889
-		String portNumber = "3306";
-		String tableName = "personne";
-
-		// iL faut une base nommee testPersonne !
-		String dbName = "testpersonne";
-
-		// creation de la connection
-		Properties connectionProps = new Properties();
-		connectionProps.put("user", userName);
-		connectionProps.put("password", password);
-		String urlDB = "jdbc:mysql://" + serverName + ":";
-		urlDB += portNumber + "/" + dbName;
-		Connection connect = DriverManager.getConnection(urlDB, connectionProps);
+		Connection connect = DBConnection.getInstance();
 
 		// creation de la table Personne
 		{
@@ -157,6 +134,28 @@ public class PrincipaleJDBC {
 			stmt.executeUpdate(drop);
 			System.out.println("9) Supprime table Personne");
 		}
+
+		DBConnection.setNomDB("spotibuzz");
+		connect = DBConnection.getInstance();
+
+		//test de la seconde base
+		{
+			String SQLPrep = "SELECT * FROM user WHERE id=?;";
+			PreparedStatement prep1 = connect.prepareStatement(SQLPrep);
+			prep1.setInt(1, 2);
+			prep1.execute();
+			ResultSet rs = prep1.getResultSet();
+			// s'il y a un resultat
+			if (rs.next()) {
+				String nom = rs.getString("email");
+
+				int id = rs.getInt("id");
+				System.out.println("  -> (" + id + ") " + nom );
+			}
+			System.out.println();
+		}
+
+
 
 	}
 
